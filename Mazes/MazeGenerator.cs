@@ -1,10 +1,16 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using Mazes.Utils;
 
 namespace Mazes
 {
+    /// <summary>
+    /// This class generates the 2-dimensional data for a procedural maze, being generated through the use
+    /// of the Disjoint-Set ADT.<para /> 
+    /// The data can be accessed through a grid which holds all the cells of the maze, with each
+    /// cell being a single unit of the maze with a max adjacency of 4 walls.
+    /// </summary>
+    /// <seealso cref="DisjointSets"/>
     public class MazeGenerator
     {
         public struct Cell
@@ -20,23 +26,28 @@ namespace Mazes
             }
         }
 
-        private readonly int ROWS, COLS;
-        private readonly int CELL_NUM;
-        private readonly int MAX_ADJACENCY = 4;
+        private readonly int Rows, Cols;
+        private readonly int CellNum;
+        private readonly int Max_Adjacency = 4;
 
         // Grid of maze cells represented by disjoint sets.
         private Cell[] grid;
         private DisjointSets sets;
-        private Stack<int> cellStack = new Stack<int>();
         private System.Random rand = new System.Random();
 
+        /// <summary>
+        /// Set the number of rows and columns for the maze to be generated, be sure to call <see cref="GenerateMaze()"/>
+        /// after invoking this constructor.
+        /// </summary>
+        /// <param name="rows">The number of rows for the maze.</param>
+        /// <param name="cols">The number of columns for the maze.</param>
         public MazeGenerator(int rows, int cols)
         {
-            ROWS = rows;
-            COLS = cols;
-            CELL_NUM = ROWS * COLS;
-            grid = new Cell[CELL_NUM];
-            sets = new DisjointSets(CELL_NUM);
+            Rows = rows;
+            Cols = cols;
+            CellNum = Rows * Cols;
+            grid = new Cell[CellNum];
+            sets = new DisjointSets(CellNum);
 
             for (int i = 0; i < grid.Length; ++i)
             {
@@ -44,43 +55,49 @@ namespace Mazes
             }
         }
 
+        /// <summary>
+        /// Procedurally generates the 2-dimensional data for a maze with the dimensions set by the 
+        /// <see cref="MazeGenerator(int, int)"/> constructor.<para />
+        /// Calling this method consecutively will always generate an entirely new maze but of same Rows by Cols 
+        /// dimensions of the given object instance. To change the dimensions, a new object must be instantiated.
+        /// </summary>
         public void GenerateMaze()
         {
             int visitedCells = 1;
-            int currCell = rand.Next(CELL_NUM);
+            int currCell = rand.Next(CellNum);
             int adjCell;
             bool adjacentFound;
 
             // Index - 0: above, 1: below, 2: left, 3: right
             // If adjacentCells[Index] = -1 then that adjacent cell does not exist.
-            int[] adjCells = new int[MAX_ADJACENCY];
+            int[] adjCells = new int[Max_Adjacency];
 
-            cellStack.Clear();
+            Stack<int> cellStack = new Stack<int>();
 
-            while (visitedCells < CELL_NUM)
+            while (visitedCells < CellNum)
             {
                 adjCell = -1;
                 adjacentFound = false;
 
-                if (currCell < COLS)
+                if (currCell < Cols)
                 {
                     adjCells[0] = -1;
                 }
                 else
                 {
-                    adjCells[0] = currCell - COLS;
+                    adjCells[0] = currCell - Cols;
                 }
 
-                if (currCell >= (CELL_NUM - COLS))
+                if (currCell >= (CellNum - Cols))
                 {
                     adjCells[1] = -1;
                 }
                 else
                 {
-                    adjCells[1] = currCell + COLS;
+                    adjCells[1] = currCell + Cols;
                 }
 
-                if (currCell % COLS == 0)
+                if (currCell % Cols == 0)
                 {
                     adjCells[2] = -1;
                 }
@@ -89,7 +106,7 @@ namespace Mazes
                     adjCells[2] = currCell - 1;
                 }
 
-                if ((currCell + 1) % COLS == 0)
+                if ((currCell + 1) % Cols == 0)
                 {
                     adjCells[3] = -1;
                 }
@@ -116,7 +133,7 @@ namespace Mazes
                     int wallIndex;
                     do
                     {
-                        wallIndex = rand.Next(MAX_ADJACENCY);
+                        wallIndex = rand.Next(Max_Adjacency);
                         adjCell = adjCells[wallIndex];
                     }
                     while (adjCell < 0);
@@ -158,13 +175,19 @@ namespace Mazes
                         currCell = cellStack.Pop();
                 }
             }
-
-            cellStack.Clear();
         }
 
-        public Cell GetGridCell(int i)
+        /// <summary>
+        /// Allows access to <see cref="grid"/> which holds the 2-dimensional maze data. <para /> 
+        /// One maze unit of type <see cref="Cell"/> can returned at a time, addressed through its grid index.
+        /// </summary>
+        /// <param name="index">The grid index of the maze cell to be accessed.</param>
+        /// <returns>
+        /// Returns a single maze unit of type <see cref="Cell"/>.
+        /// </returns>
+        public Cell GetGridCell(int index)
         {
-            return grid[i];
+            return grid[index];
         }
     }
 }
