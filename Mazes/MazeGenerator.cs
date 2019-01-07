@@ -189,5 +189,10 @@ namespace Mazes
         {
             return grid[index];
         }
+
+        public int GetGridLength()
+        {
+            return grid.Length;
+        }
     }
 }
